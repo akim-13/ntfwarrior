@@ -1,0 +1,35 @@
+#!/data/data/com.termux/files/usr/bin/bash
+
+input=$1
+
+# Internal Field Separator
+IFS="," read -ra params <<< "$input"
+
+# Check if each parameter exists
+if [[ "${#params[@]}" -lt 5 ]]; then
+    termux-toast "ERROR: Missing fields in input."
+    exit 1
+fi
+
+desc=${params[0]}
+due=${params[1]}
+ntf1=${params[2]}
+pri=${params[3]}
+tags=${params[4]}
+tags="${tags// /,}"
+etc="${params[@]:5}"
+
+#termux-toast "$desc $due $ntf1 $pri $tags $etc"
+
+#FIXME: error printing doesn't work. Probably something to do with mktemp behaviour in termux-notification env.
+tmp=$(mktemp)
+task add rc:"/data/data/com.termux/files/home/.config/taskwarrior/taskrc" "$desc" due:"$due" ntf1:"$ntf1" pri:"$pri" tag:"$tags" "$etc" 2>$tmp
+
+# If tmp file not empty, print it out.
+if [[ -s $tmp ]]; then
+    cat $tmp | termux-toast
+fi
+
+#echo "ERROR: $stderror" | termux-toast
+
+#termux-notification --action "bash -c 'am start --user 0 -n com.termux/com.termux.app.TermuxActivity'" --button1 "New task" --button1-action "bash -lc '$XDG_CONFIG_HOME/taskwarrior/new_task \$REPLY'" --id 1 --ongoing --title Daemon --alert-once
