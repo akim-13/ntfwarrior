@@ -1,6 +1,11 @@
 #!/data/data/com.termux/files/usr/bin/bash
 
-# Get the top 10 tasks based on urgency, showing only IDs and descriptions
-tasks=$(task rc:"/data/data/com.termux/files/home/.config/taskwarrior/taskrc" rc.verbose=nothing limit:10 sort:urgency- rc.defaultwidth=0 rc.report.next.columns=id,description rc.report.next.labels=1,2 next | awk 'NR>1 {print $1 ". " substr($0, index($0, $2))}')
+# Get the top 5 tasks based on urgency, showing only IDs and descriptions
+tasks=$(task rc:"/data/data/com.termux/files/home/.config/taskwarrior/taskrc" export next | jq -r '.[0:5] | .[] | "\(.id). \(.description)"' 2>&1)
 
-termux-notification --title "Top 10 Tasks" --content "$tasks"
+/data/data/com.termux/files/home/.config/taskwarrior/start_daemon "$tasks"
+
+#termux-notification --title "Daemon" --action "bash -lc 'am start --user 0 -n com.termux/com.termux.app.TermuxActivity && $XDG_CONFIG_HOME/taskwarrior/start_daemon'" --button1 "Add" --button1-action "bash -lc '$XDG_CONFIG_HOME/taskwarrior/new_task \$REPLY'" --button2 "List" --button2-action "bash -lc '$XDG_CONFIG_HOME/taskwarrior/list_tasks'" --button3 "CMD" --button3-action "bash -lc '$XDG_CONFIG_HOME/taskwarrior/cmd \$REPLY'" --content "$tasks" --id 1 --ongoing --alert-once --group "daemon"
+
+#$XDG_CONFIG_HOME/taskwarrior/start_daemon "$tasks"
+#termux-notification --id 1 --content "$tasks"
