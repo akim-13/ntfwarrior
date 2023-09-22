@@ -1,0 +1,6 @@
+#!/data/data/com.termux/files/usr/bin/bash
+
+TASKRC="/data/data/com.termux/files/home/.config/taskwarrior/taskrc"
+task rc:"$rc" > /dev/null 2>&1
+
+#termux-job-scheduler --job-id 0 --period-ms 900000 --battery-not-low false --persisted true -s "/data/data/com.termux/files/home/.config/taskwarrior/regular_upd"
