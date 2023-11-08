@@ -29,25 +29,25 @@ cur_epoch=$(date -u +%s)
 stat=$(echo $new_task | jq -r .status )
 # Check if task is recurring.
 if jq -e 'has("rtype")' <<< "$new_task" > /dev/null; then
-	# Skip task if it is a recurrence template.
-	if [[ "$stat" == "recurring" ]]; then
-		echo $new_task
-		echo
-		exit 0
-	# Update ntf1_epoch according to the difference between `due` and `ntf1` of the recurrence template (parent task).
-	elif jq -e 'has("parent")' <<< "$new_task" > /dev/null; then
-		parent_uuid=$(echo $new_task | jq -r .parent )
-		# Cannot use `task` command, creates infinite loop,
-		# therefore find the first line containing parent uuid in the data file.
-		par_data=$(grep -m 1 "$parent_uuid" /data/data/com.termux/files/home/.local/share/taskwarrior/pending.data)
-		due_par_epoch=$(echo "$par_data" | awk -F 'due:' '{print $2}' | cut -d ' ' -f 1 | tr -d '"')
-		ntf1_par_epoch=$(echo "$par_data" | awk -F 'ntf1:' '{print $2}' | cut -d ' ' -f 1 | tr -d '"')
-		ntf1_epoch=$(( due_epoch - (due_par_epoch - ntf1_par_epoch) ))
-	else
-		echo
-		echo "Error: wtf is this task"
-		exit 1
-	fi
+    # Skip task if it is a recurrence template.
+    if [[ "$stat" == "recurring" ]]; then
+        echo $new_task
+        echo
+        exit 0
+    # Update ntf1_epoch according to the difference between `due` and `ntf1` of the recurrence template (parent task).
+    elif jq -e 'has("parent")' <<< "$new_task" > /dev/null; then
+        parent_uuid=$(echo $new_task | jq -r .parent )
+        # Cannot use `task` command, creates infinite loop,
+        # therefore find the first line containing parent uuid in the data file.
+        par_data=$(grep -m 1 "$parent_uuid" /data/data/com.termux/files/home/.local/share/taskwarrior/pending.data)
+        due_par_epoch=$(echo "$par_data" | awk -F 'due:' '{print $2}' | cut -d ' ' -f 1 | tr -d '"')
+        ntf1_par_epoch=$(echo "$par_data" | awk -F 'ntf1:' '{print $2}' | cut -d ' ' -f 1 | tr -d '"')
+        ntf1_epoch=$(( due_epoch - (due_par_epoch - ntf1_par_epoch) ))
+    else
+        echo
+        echo "Error: wtf is this task"
+        exit 1
+    fi
 fi
 
 ntf1_period_ms=$(( (ntf1_epoch - cur_epoch)*1000 ))
@@ -74,9 +74,11 @@ rand_id=$RANDOM
 # For testing
 #termux-notification --title "$desc" --content "$due_formatted" --button1 "Start/Stop" --button1-action "task rc:$rc +ACTIVE _uuids | grep -q '^'"$uuid"'$' && (task rc:$rc stop $uuid && termux-toast Task stopped) || (task rc:$rc start $uuid && termux-toast Task started)" --button2 "Done" --button2-action "task rc:$rc done $uuid && termux-notification-remove $rand_id" --button3 "Dismiss" --button3-action "termux-notification-remove $rand_id" --id $rand_id --ongoing
 
-echo "termux-notification --title \"$desc\" --content \"$due_formatted\" --button1 \"Start/Stop\" --button1-action \"task rc:$rc +ACTIVE _uuids | grep -q '^'\"$uuid\"'$' && (task rc:$rc stop $uuid && termux-toast Task stopped) || (task rc:$rc start $uuid && termux-toast Task started)\" --button2 \"Done\" --button2-action \"task rc:$rc done $uuid && termux-notification-remove $rand_id\" --button3 \"Dismiss\" --button3-action \"termux-notification-remove $rand_id\" --id $rand_id --ongoing" >> $ntf_file
+echo "termux-notification --title \"$desc\" --content \"Due at $due_formatted\" --button1 \"Start/Stop\" --button1-action \"task rc:$rc +ACTIVE _uuids | grep -q '^'\"$uuid\"'$' && (task rc:$rc stop $uuid && termux-toast Task stopped) || (task rc:$rc start $uuid && termux-toast Task started)\" --button2 \"Done\" --button2-action \"task rc:$rc done $uuid && bash -lc '/data/data/com.termux/files/home/.config/taskwarrior/cancel_task_job $rand_id' && termux-notification-remove $rand_id\" --id $rand_id --on-delete \"bash -lc '/data/data/com.termux/files/home/.local/share/taskwarrior/ntfs/$uuid'\" --ongoing" >> $ntf_file
 
-echo "termux-job-scheduler --cancel --job-id $rand_id" >> $ntf_file
+# /data/data/com.termux/files/home/.local/share/taskwarrior/ntfs
+
+# echo "termux-job-scheduler --cancel --job-id $rand_id" >> $ntf_file
 chmod +x $ntf_file
 
 termux-job-scheduler --script $ntf_file --job-id $rand_id --period-ms $ntf1_period_ms --persisted true --battery-not-low false > /dev/null

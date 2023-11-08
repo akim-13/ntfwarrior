@@ -1,0 +1,4 @@
+#!/data/data/com.termux/files/usr/bin/bash
+
+job_id=$1
+termux-job-scheduler --cancel --job-id $job_id

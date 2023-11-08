@@ -1,0 +1,15 @@
+#!/data/data/com.termux/files/usr/bin/bash
+
+XDG_DATA_HOME="/data/data/com.termux/files/home/.local/share"
+TW="$XDG_DATA_HOME/taskwarrior"
+TESTING="$XDG_DATA_HOME/taskwarrior_testing"
+ACTUAL_DATA_TMP="$XDG_DATA_HOME/taskwarrior_actual_data_tmp"
+
+if [[ -d "$ACTUAL_DATA_TMP" ]]; then
+    mv -n $TW $TESTING && mv -n $ACTUAL_DATA_TMP $TW
+    echo "Switched to PRODUCTION environment."
+else
+    mv -n $TW $ACTUAL_DATA_TMP && mv -n $TESTING $TW
+    echo "Switched to TESTING environment."
+fi
+

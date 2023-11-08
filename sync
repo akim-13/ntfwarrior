@@ -1,0 +1,16 @@
+#!/data/data/com.termux/files/usr/bin/bash
+
+EXTERNAL="/data/data/com.termux/files/home/storage/shared/Documents/ntfwarrior"
+INTERNAL="/data/data/com.termux/files/home/.config/taskwarrior"
+BUP="$INTERNAL/bup"
+
+# Create the backup directory if it doesn't exist.
+mkdir -p "$BUP"
+
+# Move all files inside INTERNAL into bup, except for bup itself.
+find "$INTERNAL" -maxdepth 1 ! -path "$INTERNAL/.*" ! -path "$BUP" ! -path "$INTERNAL" ! -path "$INTERNAL/DO NOT EDIT THIS DIR, SEE SYNC SCRIPT" -exec mv -f {} "$BUP/" \;
+
+# Copy all files from EXTERNAL to INTERNAL.
+cp -r "$EXTERNAL/"* "$INTERNAL"
+chmod +x "$INTERNAL/"*
+chmod +x "$INTERNAL/hooks/"*
