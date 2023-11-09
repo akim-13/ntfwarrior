@@ -87,4 +87,3 @@ termux-job-scheduler --script $ntf_file --job-id $rand_id --period-ms $ntf1_peri
 echo $new_task
 # Feedback (terminal output)
 echo
-

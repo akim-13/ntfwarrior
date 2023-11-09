@@ -1,6 +1,13 @@
 #!/data/data/com.termux/files/usr/bin/bash
 
-TASKRC="/data/data/com.termux/files/home/.config/taskwarrior/taskrc"
-task rc:"$rc" > /dev/null 2>&1
+rc="/data/data/com.termux/files/home/.config/taskwarrior/taskrc"
 
-#termux-job-scheduler --job-id 0 --period-ms 900000 --battery-not-low false --persisted true -s "/data/data/com.termux/files/home/.config/taskwarrior/regular_upd"
+task rc:"$rc" > /dev/null 2>&1
+# echo $(date) >> "/data/data/com.termux/files/home/.config/taskwarrior/log.log"
+# task rc:"$rc" >> "/data/data/com.termux/files/home/.config/taskwarrior/log.log"
+# echo
+
+# If the job is not running.
+if ! termux-job-scheduler -p | grep -q "Job 0"; then
+    termux-job-scheduler --job-id 0 --period-ms 900000 --battery-not-low false --persisted true -s "/data/data/com.termux/files/home/.config/taskwarrior/regular_upd"
+fi

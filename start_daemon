@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/bash
-XDG_CONFIG_HOME=/data/data/com.termux/files/home/.config
+XDG_CONFIG_HOME="/data/data/com.termux/files/home/.config"
+UPD="$XDG_CONFIG_HOME/taskwarrior/regular_upd"
 content=$1
 
-termux-notification --title "Task manager" --action "bash -lc 'am start --user 0 -n com.termux/com.termux.app.TermuxActivity; $XDG_CONFIG_HOME/taskwarrior/start_daemon'" --on-delete "bash -lc '$XDG_CONFIG_HOME/taskwarrior/start_daemon'" --button1 "Add" --button1-action "bash -lc '$XDG_CONFIG_HOME/taskwarrior/new_task \$REPLY'" --button2 "List" --button2-action "bash -lc '$XDG_CONFIG_HOME/taskwarrior/list_tasks'" --button3 "CMD" --button3-action "bash -lc '$XDG_CONFIG_HOME/taskwarrior/cmd \$REPLY'" --content "$content" --id 1 --ongoing --alert-once --group "daemon"
+termux-notification --title "Task manager" --action "bash -lc 'am start --user 0 -n com.termux/com.termux.app.TermuxActivity; $XDG_CONFIG_HOME/taskwarrior/start_daemon; $UPD'" --on-delete "bash -lc '$XDG_CONFIG_HOME/taskwarrior/start_daemon; $UPD'" --button1 "Add" --button1-action "bash -lc '$XDG_CONFIG_HOME/taskwarrior/new_task \$REPLY; $UPD'" --button2 "List" --button2-action "bash -lc '$UPD; $XDG_CONFIG_HOME/taskwarrior/list_tasks'" --button3 "CMD" --button3-action "bash -lc '$UPD; $XDG_CONFIG_HOME/taskwarrior/cmd \$REPLY'" --content "$content" --id 1 --ongoing --alert-once --group "daemon"
